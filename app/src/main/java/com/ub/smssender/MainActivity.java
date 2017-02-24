@@ -4,17 +4,24 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ub.smssender.models.ModelMensajes;
+
+import java.util.Arrays;
+
+import static android.Manifest.*;
 import static com.ub.smssender.services.WSUtils.*;
 
 import retrofit2.Call;
@@ -30,6 +37,9 @@ public class MainActivity extends Activity {
     private TextView txtData;
     private Button btnSend;
 
+    private String[] permisos =  {permission.READ_PHONE_STATE, permission.SEND_SMS};
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,82 +48,58 @@ public class MainActivity extends Activity {
         txtData = (TextView) findViewById(R.id.txtImei);
         btnSend = (Button) findViewById(R.id.btnSend); btnSend.setEnabled(false);
 
-        this.permisos(); //SOLICITAR PERMISOS
+
+        this.permisos(permisos); //SOLICITAR PERMISOS
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     private void init(){
-        //si TODOS los permisos esta garantizados
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-            btnSend.setEnabled(true);
-            btnSend.setOnClickListener((view) ->{
+
+        btnSend.setEnabled(true);
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage("6671995737", null, "hola dani", null,null);
-            });
-            txtData.setText(this.getDevideImei());
-        }else{
-            System.out.println("ambos permisos no garantizados");
-        }
+                smsManager.sendTextMessage("6672118438", null, "hola probando un mensaje", null,null);
+            }
+        });
+        txtData.setText(this.getDevideImei());
 
         //this.obtenerMensajes();
-
-        //iniciar servicio de mensajes
-
     }
 
-    private void permisos() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //solicitar el permiso
-            ActivityCompat.requestPermissions(
-                    MainActivity.this,
-                    new String[]{Manifest.permission.READ_PHONE_STATE},
-                    PERMISSION_READ_PHONE_STATE
-            );
-        } else {
-            Log.i("permiso", "read phone state ya concedido");
-            init();
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            //solicitar el permiso
-            ActivityCompat.requestPermissions(
-                    MainActivity.this,
-                    new String[]{Manifest.permission.SEND_SMS},
-                    PERMISSION_SEND_SMS
-            );
-        } else {
-            //permisos ya concedidos
-            Log.i("permiso", "Send sms ya concedido");
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
+    private void permisos(String[] listaPermisos) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(MainActivity.this, permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            //pedir permisos
+            ActivityCompat.requestPermissions(MainActivity.this, listaPermisos, 1);
+        }else{
+            //permisos garantizados
             init();
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
-        switch (requestCode) {
-            case PERMISSION_READ_PHONE_STATE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.w("permision", "PERMISO ACCEDIDO code: " + PERMISSION_READ_PHONE_STATE);
-                    Toast.makeText(MainActivity.this, "Servicio listo para operar", Toast.LENGTH_LONG).show();
-                    init();
-                } else {
-                    //mostrar mensaje de necesida de permiso para funcionar
-                    Toast.makeText(MainActivity.this, "Son necesarios permisos para operar", Toast.LENGTH_LONG).show();;
-                    Log.w("permision", "PERMISO DENEGADO code: " + PERMISSION_READ_PHONE_STATE);
-                }
-                break;
-            case PERMISSION_SEND_SMS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.w("permision", "PERMISO ACCEDIDO code: " + PERMISSION_SEND_SMS);
-                    Toast.makeText(MainActivity.this, "Servicio listo para operar", Toast.LENGTH_LONG).show();;
-                    init();
-                } else {
-                    //mostrar mensaje de necesida de permiso para funcionar
-                    Toast.makeText(MainActivity.this, "Son necesarios permisos para operar", Toast.LENGTH_LONG).show();;
-                    Log.w("permision", "PERMISO DENEGADO code: " + PERMISSION_SEND_SMS);
-                }
-                break;
-            default: Log.i("Atention", "No requestCode"); break;
+        Log.w("permisions", Arrays.toString(permissions));
+        Log.w("grantResults", Arrays.toString(grantResults));
+        Log.w("code", String.valueOf(requestCode));
+
+        boolean todosLosPermisos = true;
+        for (int grantResult : grantResults) {
+            if (grantResult != 0){
+                todosLosPermisos = false;
+            }
+        }
+
+        if (todosLosPermisos){
+            init();
+            //obtenerMensajes();
+        }else{
+            Toast.makeText(MainActivity.this, "Se necesitan todos los permisos para operar", Toast.LENGTH_LONG).show();
         }
     }
 
