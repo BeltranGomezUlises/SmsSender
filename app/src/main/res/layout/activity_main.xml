@@ -8,33 +8,56 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.ub.smssender.MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="IMEI:"
-        android:id="@+id/txtTag"
-        android:textAppearance="@android:style/TextAppearance.Material.Headline" />
+    tools:context="com.ub.smssender.Main.MainActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/txtTag"
-        android:layout_marginStart="11dp"
+        android:id="@+id/txtModel"
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:layout_marginTop="14dp"
+        android:layout_alignParentStart="true"
+        android:text="Modelo: " />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/txtImei"
-        android:textAppearance="@android:style/TextAppearance.Material.Widget.ActionMode.Title"
-        android:layout_above="@+id/btnSend"
-        android:text="prueba" />
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:layout_marginTop="14dp"
+        android:layout_below="@+id/txtModel"
+        android:layout_alignParentStart="true"
+        android:text="IMEI: " />
 
     <Button
-        android:text="test"
+        android:text="Enviar de sim 2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/txtTag"
+        android:layout_below="@+id/btnSim1"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="16dp"
-        android:id="@+id/btnSend"/>
+        android:layout_marginTop="17dp"
+        android:id="@+id/btnSim2" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:ems="10"
+        android:layout_marginTop="21dp"
+        android:id="@+id/edtCell"
+        android:elevation="3dp"
+        android:hint="# celular a enviar mensaje"
+        android:layout_below="@+id/txtImei"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="Enviar de sim 1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnSim1"
+        android:layout_below="@+id/edtCell"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="21dp" />
+
 
 </RelativeLayout>
