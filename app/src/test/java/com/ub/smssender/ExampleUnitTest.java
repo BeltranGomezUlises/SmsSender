@@ -14,9 +14,4 @@ public class ExampleUnitTest {
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
     }
-
-    @Test
-    public void sendMessage(){
-        SMSUtils.sendSMS(null,0,"6672118438",null,"Hi Stackoverflow! its me Maher. Sent by sim1",null,null);
-    }
 }

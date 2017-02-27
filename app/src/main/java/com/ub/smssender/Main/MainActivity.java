@@ -18,6 +18,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,11 @@ public class MainActivity extends Activity {
     private TextView txtImei;
     private TextView txtModel;
 
+    private Button btnSim1;
+    private Button btnSim2;
+
+    private EditText edtCell;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,10 @@ public class MainActivity extends Activity {
 
         txtImei = (TextView) findViewById(R.id.txtImei);
         txtModel = (TextView) findViewById(R.id.txtModel);
+        btnSim1 = (Button) findViewById(R.id.btnSim1);
+        btnSim2 = (Button) findViewById(R.id.btnSim2);
+        edtCell = (EditText) findViewById(R.id.edtCell);
+
 
         this.permisos(PERMISOS); //SOLICITAR PERMISOS
 
@@ -61,19 +71,55 @@ public class MainActivity extends Activity {
 
     private void init(){
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
-        for (String s : telephonyInfo.getImeiList()) {
+        List<String> imeiList = telephonyInfo.getImeiList();
+        for (String s : imeiList) {
             txtImei.setText(txtImei.getText() + "\n" + s);
         }
 
-        txtModel.setText(txtModel.getText() + "\n" + Build.MANUFACTURER + " " + Build.MODEL);
+        btnSim1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String cell = edtCell.getText().toString();
+                System.out.println(cell);
 
-        SubscriptionManager subscriptionManager = SubscriptionManager.from(getApplicationContext());
-        List<SubscriptionInfo> subscriptionInfoList = subscriptionManager.getActiveSubscriptionInfoList();
-        for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
-            int subscriptionId = subscriptionInfo.getSubscriptionId();
-            Log.d("info","subscriptionId:"+subscriptionId +" name: " + subscriptionInfo.getDisplayName());
-            //SmsManager.getSmsManagerForSubscriptionId(subscriptionId).sendTextMessage("6672118438", null, "un text", null, null);
+                if (cell.length() != 10){
+                    Toast.makeText(MainActivity.this, "El número no es valido", Toast.LENGTH_LONG).show();
+                }else{
+                    SmsManager.getDefault().sendTextMessage(cell, null, "Mensaje de prueba sim 1 - Ulises Beltrán", null, null);
+                    Toast.makeText(MainActivity.this, "Enviando mensaje...", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+
+        if (imeiList.size() == 1){
+            btnSim2.setVisibility(View.INVISIBLE);
+        }else{
+            btnSim2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String cell = edtCell.getText().toString();
+                    System.out.println(cell);
+
+                    if (cell.length() != 10){
+                        Toast.makeText(MainActivity.this, "El número no es valido", Toast.LENGTH_LONG).show();
+                    }else{
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                            SmsManager.getSmsManagerForSubscriptionId(2).sendTextMessage(cell, null, "Mensaje de prueba sim 2 - Ulises Beltrán", null, null);
+                            Toast.makeText(MainActivity.this, "Enviando mensaje...", Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(MainActivity.this, "Version de android incompatible", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+
+                }
+            });
         }
+
+
+
+        txtModel.setText(txtModel.getText() + "\n" + Build.MANUFACTURER + " " + Build.MODEL);
 
         Intent serviceIntent = new Intent(MainActivity.this, SMSService.class);
         MainActivity.this.startService(serviceIntent);
@@ -132,4 +178,17 @@ public class MainActivity extends Activity {
         });
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
+    private void suscriptionInfo(){
+        SubscriptionManager subscriptionManager = SubscriptionManager.from(getApplicationContext());
+        List<SubscriptionInfo> subscriptionInfoList = subscriptionManager.getActiveSubscriptionInfoList();
+        for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
+            int subscriptionId = subscriptionInfo.getSubscriptionId();
+            Log.d("info","subscriptionId:"+subscriptionId +" name: " + subscriptionInfo.getDisplayName());
+
+            /*TO SEND A MESSAGE FRON A PARTICULAR SUSCRIPTION*/
+            //SmsManager.getSmsManagerForSubscriptionId(subscriptionId).sendTextMessage("6672118438", null, "un text", null, null);
+        }
+    }
 }
