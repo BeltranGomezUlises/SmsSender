@@ -5,14 +5,11 @@ android {
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "com.ub.smssender"
-        minSdkVersion 19
+        minSdkVersion 22
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        jackOptions {
-            enabled true
-        }
     }
     buildTypes {
         release {
@@ -20,11 +17,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
-    }
-
 }
 
 dependencies {
@@ -37,5 +29,5 @@ dependencies {
     //RETROFIT
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-
+    compile 'com.kirianov.multisim:multisim:2.0@aar'
 }
