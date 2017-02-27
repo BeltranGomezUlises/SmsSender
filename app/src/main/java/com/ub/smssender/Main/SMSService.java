@@ -3,6 +3,8 @@ package com.ub.smssender.Main;
 import android.app.IntentService;
 import android.content.Intent;
 
+import com.ub.smssender.services.WSUtils;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,6 +30,7 @@ public class SMSService extends IntentService {
     {
         public void run()
         {
+
         }
     }
 }
