@@ -30,34 +30,13 @@
         android:text="IMEI: " />
 
     <Button
-        android:text="Enviar de sim 2"
+        android:id="@+id/btnSalir"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btnSim1"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="17dp"
-        android:id="@+id/btnSim2" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:ems="10"
-        android:layout_marginTop="21dp"
-        android:id="@+id/edtCell"
-        android:elevation="3dp"
-        android:hint="# celular a enviar mensaje"
         android:layout_below="@+id/txtImei"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:text="Enviar de sim 1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnSim1"
-        android:layout_below="@+id/edtCell"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="21dp" />
+        android:layout_marginTop="41dp"
+        android:text="Detener y Salir" />
 
 
 </RelativeLayout>
