@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">MSG Sending Device</string>
+    <string name="title_activity_login">Inicia sesion</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Iniciar sesion</string>
+    <string name="error_invalid_email">Email proporcionado es invalido</string>
+    <string name="error_invalid_password">Password invalido</string>
+    <string name="error_incorrect_password">Password incorrecto</string>
+    <string name="error_field_required">El campo es requerido</string>
 </resources>

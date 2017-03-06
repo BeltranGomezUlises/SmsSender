@@ -5,7 +5,6 @@ import android.telephony.TelephonyManager;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by ulises on 25/02/17.
