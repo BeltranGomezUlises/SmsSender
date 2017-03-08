@@ -35,4 +35,12 @@ public class BodyResponse {
         this.datos = datos;
     }
 
+    @Override
+    public String toString() {
+        return "BodyResponse{" +
+                "exito=" + exito +
+                ", mensaje='" + mensaje + '\'' +
+                ", datos=" + datos +
+                '}';
+    }
 }

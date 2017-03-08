@@ -16,7 +16,8 @@ import retrofit2.http.Path;
 
 public interface ServiceMensajes {
 
-    public static final String END_POINT = "http://192.168.1.74:45200/api/";
+    //servidor 201.163.30.113
+    String END_POINT = "http://192.168.3.140:45200/api/";
 
     @GET("mensajes/{usuarioId}/{imei}")
     Call<BodyResponse> mensajes(@Header("Authorization") String token, @Path("usuarioId") String usuario, @Path("imei") String imei);
