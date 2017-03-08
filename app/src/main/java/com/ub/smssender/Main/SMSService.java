@@ -35,11 +35,10 @@ import static com.ub.smssender.services.WSUtils.webServices;
 public class SMSService extends IntentService {
 
     String SENT = "SMS_SENT";
-    String DELIVERED = "SMS_DELIVERED";
-
-    String userId;
 
     private static Timer timer;
+
+    private boolean enviandoSMS = false;
 
     public SMSService() {
         super("SMS Service");
@@ -54,7 +53,7 @@ public class SMSService extends IntentService {
             public void run() {
                 getMensajes();
             }
-        }, 0, 10000);
+        }, 0, 20000);
     }
 
     public static void stopTimer(){
@@ -65,14 +64,10 @@ public class SMSService extends IntentService {
 
     private void getMensajes() {
         //esperar un tiempo
-        if (WSUtils.mensajes == null){
+        if (!enviandoSMS){
             solicitarPaqueteMensajes2();
         }else{
-            if(WSUtils.mensajes.size() > 0){
-                System.out.println("aun quedan " + WSUtils.mensajes.size() + " mensajes");
-            }else{
-                solicitarPaqueteMensajes2();
-            }
+            System.out.println("entoy trabajando aun");
         }
     }
 
@@ -90,7 +85,6 @@ public class SMSService extends IntentService {
                         if (modelMensajes.size() == 0){
                             System.out.println("No hay ningun mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imei);
                         }
-                        WSUtils.mensajes = new ArrayList<>(modelMensajes);
                         for (final ModelMensaje modelMensaje : modelMensajes) {
                             System.out.println("enviando mensaje: " + modelMensaje.get_id() + " para: " + modelMensaje.getDestino());
 
@@ -110,6 +104,11 @@ public class SMSService extends IntentService {
                             }else {
                                 PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
                                 SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+                            }
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
                         }
                     } catch (IOException e) {

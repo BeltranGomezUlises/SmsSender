@@ -56,7 +56,6 @@ public class SmsSentReceiver extends BroadcastReceiver{
                     if (response.isSuccessful()){
                         //TODO aqui se podria hacer algo  despues de capturar como enviado
                         System.out.println("enviado: " + smsId);
-                        WSUtils.removeMensaje(smsId);
                     }
                 }
 
