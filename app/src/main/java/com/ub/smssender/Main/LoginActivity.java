@@ -19,8 +19,13 @@ import android.widget.Toast;
 import com.ub.smssender.R;
 import com.ub.smssender.models.ModelLogin;
 import com.ub.smssender.services.BodyResponse;
+import com.ub.smssender.utils.JWTDecoder;
 import com.ub.smssender.utils.UtilPreferences;
 
+import java.util.Arrays;
+
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -159,6 +164,7 @@ public class LoginActivity extends Activity {
                     if (response.body().isExito()){
                         UtilPreferences.saveLoged(LoginActivity.this, new ModelLogin(email,pass));
                         UtilPreferences.saveToken(LoginActivity.this, response.body().getDatos().toString());
+                        System.out.println("token: " + response.body().getDatos().toString());
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
                         showProgress(false);
@@ -176,6 +182,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onFailure(Call<BodyResponse> call, Throwable t) {
                 showProgress(false);
+                t.printStackTrace();
                 Toast.makeText(LoginActivity.this, "peticion al servidor fallida", Toast.LENGTH_LONG).show();;
                 Log.e("Service: ", t.getMessage());
 

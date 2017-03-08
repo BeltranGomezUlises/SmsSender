@@ -10,7 +10,6 @@ import android.util.Log;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.ub.smssender.models.ModelMensaje;
 import com.ub.smssender.services.BodyResponse;
-import com.ub.smssender.services.SmsDeliverReceiver;
 import com.ub.smssender.services.SmsSentReceiver;
 import com.ub.smssender.services.WSUtils;
 import com.ub.smssender.utils.TelephonyInfo;
@@ -37,7 +36,9 @@ public class SMSService extends IntentService {
     String SENT = "SMS_SENT";
     String DELIVERED = "SMS_DELIVERED";
 
-    Timer timer;
+    String userId;
+
+    private static Timer timer;
 
     public SMSService() {
         super("SMS Service");
@@ -46,19 +47,22 @@ public class SMSService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         registerReceiver(new SmsSentReceiver(), new IntentFilter(SENT));
-        registerReceiver(new SmsDeliverReceiver(), new IntentFilter(DELIVERED));
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 getMensajes();
             }
-        }, 0, 10000);
+        }, 0, 20000);
     }
 
+    public static void stopTimer(){
+        if (timer != null){
+            timer.cancel();
+        }
+    }
 
     private void getMensajes() {
-        System.out.println("volví por mas mensajes");
         //esperar un tiempo
         if (WSUtils.mensajes == null){
             solicitarPaqueteMensajes();
@@ -75,17 +79,18 @@ public class SMSService extends IntentService {
         //obtener los mensajes a enviar
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
-        for (String imei : imeiList) {
-            final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.getToken(this), "58a0e7c955ceb035c6449a82", imei);
+        for (final String imei : imeiList) {
+            final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
             request.enqueue(new Callback<BodyResponse>() {
                 @Override
                 public void onResponse(Call<BodyResponse> call, Response<BodyResponse> response) {
                     if (response.isSuccessful()){
                         if (response.body().isExito()){
+                            System.out.println(response.body().toString());
                             try {
                                 List<ModelMensaje> modelMensajes = WSUtils.readValue(response.body().getDatos(), new TypeReference<List<ModelMensaje>>(){});
                                 if (modelMensajes.size() == 0){
-                                    System.out.println("pero no hay ningun pinche mensaje para mi");
+                                    System.out.println("pero no hay ningun pinche mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imei);
                                 }
                                 WSUtils.mensajes = new ArrayList<>(modelMensajes);
 
@@ -96,12 +101,23 @@ public class SMSService extends IntentService {
                                     in.putExtra("smsId", modelMensaje.get_id());
                                     sendBroadcast(in);
 
-                                    PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), 0);
-                                    PendingIntent deliveredPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), 0);
+                                    System.out.println("mide: " + modelMensaje.getMensaje().length());
 
-                                    SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, deliveredPI);
+                                    if (modelMensaje.getMensaje().length() > 160){
+                                        ArrayList<String> messageList = SmsManager.getDefault().divideMessage(modelMensaje.getMensaje());
+                                        ArrayList<PendingIntent> pendingIntents = new ArrayList<>();
+
+                                        for (int i = 0; i < messageList.size(); i++) {
+                                            pendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT),PendingIntent.FLAG_ONE_SHOT));
+                                        }
+
+                                        SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+                                    }else {
+                                        PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
+                                        SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+                                    }
                                     try {
-                                        Thread.sleep(1500);
+                                        Thread.sleep(3000);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
@@ -111,7 +127,7 @@ public class SMSService extends IntentService {
                             }
                         }else{
                             //pedir nuevo token
-                            System.out.println("pedir el nuevo token");
+                            Log.w("Service: ", response.body().getMensaje());
                         }
                     }else{
                         Log.w("Warning", "Sin exito para obtener mensajes");
