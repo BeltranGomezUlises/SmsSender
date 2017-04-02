@@ -67,13 +67,13 @@ public class SMSService extends IntentService {
     private void getMensajes() {
         //esperar un tiempo
         if (!enviandoSMS){
-            solicitarPaqueteMensajes2();
+            solicitarPaqueteMensajes();
         }else{
             System.out.println("entoy trabajando aun");
         }
     }
 
-    private void solicitarPaqueteMensajes2(){
+    private void solicitarPaqueteMensajes(){
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
         //for (final String imei : imeiList) {
@@ -106,16 +106,10 @@ public class SMSService extends IntentService {
                                 for (int i = 0; i < messageList.size(); i++) {
                                     pendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT),PendingIntent.FLAG_ONE_SHOT));
                                 }
-
-                                //SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                                    getSmsManagerForSubscriptionId(j+1).sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
-                                }else{
-                                    SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
-                                }
+                                this.sendSMS(j+1, modelMensaje, messageList, pendingIntents);
                             }else {
                                 PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
-                                SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+                                this.sendSMS(j+1, modelMensaje, sentPI);
                             }
                             try {
                                 Thread.sleep(3000);
@@ -134,6 +128,21 @@ public class SMSService extends IntentService {
                 e.printStackTrace();
             }
         }
+    }
 
+    private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, ArrayList<String> messageList, ArrayList<PendingIntent> pendingIntents){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            getSmsManagerForSubscriptionId(subscriptionIndex).sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+        }else{
+            SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+        }
+    }
+
+    private void sendSMS(int subscriptionIndex,  ModelMensaje modelMensaje, PendingIntent sentPI){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            getSmsManagerForSubscriptionId(subscriptionIndex).sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+        }else{
+            SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+        }
     }
 }

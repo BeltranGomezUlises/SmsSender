@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -85,9 +84,11 @@ public class LoginActivity extends Activity {
 
         //INTENT PARA HACER PREDETERMINADA LA APP
 
-       /* Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+       /*
+        Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
         intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
-        startActivityForResult(intent, DEF_SMS_REQ);*/
+        startActivityForResult(intent, DEF_SMS_REQ);
+       */
     }
 
 
