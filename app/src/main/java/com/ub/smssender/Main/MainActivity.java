@@ -25,6 +25,7 @@ import com.ub.smssender.utils.JWTDecoder;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission;
@@ -36,6 +37,11 @@ public class MainActivity extends Activity {
 
     private TextView txtImei;
     private TextView txtModel;
+    public static TextView txtMensajesEnviados;
+    public static TextView txtMensajesEnviados2;
+    public static int contador = 0;
+    public static int contador2 = 0;
+    public static List<String> imeis = new ArrayList<>(); //lista con los IMEI's
     private Button btnSalir;
     private Intent serviceIntent;
 
@@ -47,6 +53,10 @@ public class MainActivity extends Activity {
         txtImei = (TextView) findViewById(R.id.txtImei);
         txtModel = (TextView) findViewById(R.id.txtModel);
         btnSalir = (Button) findViewById(R.id.btnSalir);
+        txtMensajesEnviados = (TextView) findViewById(R.id.txtMensajesEnviados);
+        txtMensajesEnviados2 = (TextView) findViewById(R.id.txtMensajesEnviados2);
+        txtMensajesEnviados.setText("Mensajes enviados del IMEI 1: " + "\n" + contador);
+        txtMensajesEnviados2.setText("Mensajes enviados del IMEI 2: " + "\n" + contador2);
 
         this.permisos(PERMISOS); //SOLICITAR PERMISOS
     }
@@ -83,6 +93,7 @@ public class MainActivity extends Activity {
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
         for (String s : imeiList) {
+            imeis.add(s);
             txtImei.setText(txtImei.getText() + "\n" + s);
         }
 

@@ -28,7 +28,14 @@
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="30dp">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/logo" />
 
             <EditText
                 android:id="@+id/email"
@@ -36,25 +43,27 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
-                android:maxLines="1"/>
+                android:maxLines="1" />
 
             <EditText
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:hint="@string/prompt_password"
                 android:imeActionId="@+id/login"
                 android:imeOptions="actionUnspecified"
                 android:inputType="textPassword"
-                android:maxLines="1"/>
+                android:maxLines="1" />
 
             <Button
                 android:id="@+id/email_sign_in_button"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="50dp"
                 android:text="@string/action_sign_in"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
         </LinearLayout>

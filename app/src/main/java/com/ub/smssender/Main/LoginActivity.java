@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -19,13 +20,8 @@ import android.widget.Toast;
 import com.ub.smssender.R;
 import com.ub.smssender.models.ModelLogin;
 import com.ub.smssender.services.BodyResponse;
-import com.ub.smssender.utils.JWTDecoder;
 import com.ub.smssender.utils.UtilPreferences;
 
-import java.util.Arrays;
-
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,6 +35,7 @@ public class LoginActivity extends Activity {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private static final int DEF_SMS_REQ = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +82,12 @@ public class LoginActivity extends Activity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        //INTENT PARA HACER PREDETERMINADA LA APP
+
+       /* Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+        startActivityForResult(intent, DEF_SMS_REQ);*/
     }
 
 

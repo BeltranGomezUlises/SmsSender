@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.telephony.SmsManager;
 import android.util.Log;
 
@@ -26,6 +27,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.telephony.SmsManager.getSmsManagerForSubscriptionId;
 import static com.ub.smssender.services.WSUtils.webServices;
 
 /**
@@ -74,8 +76,10 @@ public class SMSService extends IntentService {
     private void solicitarPaqueteMensajes2(){
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
-        for (final String imei : imeiList) {
-            final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
+        //for (final String imei : imeiList) {
+        for(int j = 0;j < imeiList.size();j++){
+            //final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
+            final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imeiList.get(j));
             try {
                 Response<BodyResponse> response = request.execute();
                 if (response.body().isExito()){
@@ -83,13 +87,16 @@ public class SMSService extends IntentService {
                     try {
                         List<ModelMensaje> modelMensajes = WSUtils.readValue(response.body().getDatos(), new TypeReference<List<ModelMensaje>>(){});
                         if (modelMensajes.size() == 0){
-                            System.out.println("No hay ningun mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imei);
+                            //System.out.println("No hay ningun mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imei);
+                            System.out.println("No hay ningun mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imeiList.get(j));
                         }
                         for (final ModelMensaje modelMensaje : modelMensajes) {
                             System.out.println("enviando mensaje: " + modelMensaje.get_id() + " para: " + modelMensaje.getDestino());
 
                             Intent in = new Intent("services.SMS_SENT");
                             in.putExtra("smsId", modelMensaje.get_id());
+                            //in.putExtra("IMEIoutput",imei);
+                            in.putExtra("IMEIoutput",imeiList.get(j));
                             sendBroadcast(in);
 
                             if (modelMensaje.getMensaje().length() > 160){
@@ -100,7 +107,12 @@ public class SMSService extends IntentService {
                                     pendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT),PendingIntent.FLAG_ONE_SHOT));
                                 }
 
-                                SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+                                //SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                                    getSmsManagerForSubscriptionId(j+1).sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+                                }else{
+                                    SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+                                }
                             }else {
                                 PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
                                 SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);

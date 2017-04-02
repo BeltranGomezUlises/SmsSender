@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.SmsManager;
 
+import com.ub.smssender.Main.MainActivity;
 import com.ub.smssender.models.ModelEnviado;
 
 import retrofit2.Call;
@@ -18,37 +19,40 @@ import retrofit2.Response;
  */
 
 public class SmsSentReceiver extends BroadcastReceiver{
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String smsId = "";
+        String imeiOutput = "";
         if(intent.getAction().equals("services.SMS_SENT")) {
             smsId = intent.getExtras().getString("smsId");
+            imeiOutput = intent.getExtras().getString("IMEIoutput");
         }
 
         if (!smsId.isEmpty()){
             switch (getResultCode())
             {
                 case Activity.RESULT_OK:
-                    this.capturarEnviado(smsId, 1, "RESULT_OK");
+                    this.capturarEnviado(smsId, imeiOutput, 1, "RESULT_OK");
                     break;
                 case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                    this.capturarEnviado(smsId, 2, "RESULT_ERROR_GENERIC_FAILURE");
+                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_GENERIC_FAILURE");
                     break;
                 case SmsManager.RESULT_ERROR_NO_SERVICE:
-                    this.capturarEnviado(smsId, 2, "RESULT_ERROR_NO_SERVICE");
+                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NO_SERVICE");
                     break;
                 case SmsManager.RESULT_ERROR_NULL_PDU:
-                    this.capturarEnviado(smsId, 2, "RESULT_ERROR_NULL_PDU");
+                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NULL_PDU");
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
-                    this.capturarEnviado(smsId, 2, "RESULT_ERROR_RADIO_OFF");
+                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_RADIO_OFF");
                     break;
             }
             //se envió este mensaje, continuar con los demas
         }
     }
 
-    private void capturarEnviado(final String smsId, int estado, String error){
+    private void capturarEnviado(final String smsId, final String imei, int estado, String error){
          final Call<BodyResponse> call = WSUtils.webServices().enviado(new ModelEnviado(smsId, estado, error));
             call.enqueue(new Callback<BodyResponse>() {
                 @Override
@@ -56,6 +60,13 @@ public class SmsSentReceiver extends BroadcastReceiver{
                     if (response.isSuccessful()){
                         //TODO aqui se podria hacer algo  despues de capturar como enviado
                         System.out.println("enviado: " + smsId);
+                        if(MainActivity.txtMensajesEnviados.getText().toString().contains(imei)){
+                            MainActivity.contador++;
+                            MainActivity.txtMensajesEnviados.setText("Mensajes enviados IMEI 1: " + "\n" + MainActivity.contador);
+                        }else{
+                            MainActivity.contador2++;
+                            MainActivity.txtMensajesEnviados2.setText("Mensajes enviados IMEI 2: " + "\n" + MainActivity.contador2);
+                        }
                     }
                 }
 
