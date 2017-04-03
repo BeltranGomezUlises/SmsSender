@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.ub.smssender.R;
 import com.ub.smssender.models.ModelLogin;
-import com.ub.smssender.services.BodyResponse;
+import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.utils.UtilPreferences;
 
 import retrofit2.Call;
@@ -160,10 +160,10 @@ public class LoginActivity extends Activity {
     }
 
     private void login(final String email, final String pass){
-        final Call<BodyResponse> request = webServices().login(new ModelLogin(email, pass));
-        request.enqueue(new Callback<BodyResponse>() {
+        final Call<ModelBodyResponse> request = webServices().login(new ModelLogin(email, pass));
+        request.enqueue(new Callback<ModelBodyResponse>() {
             @Override
-            public void onResponse(Call<BodyResponse> call, Response<BodyResponse> response) {
+            public void onResponse(Call<ModelBodyResponse> call, Response<ModelBodyResponse> response) {
                 if (response.isSuccessful()){
                     if (response.body().isExito()){
                         UtilPreferences.saveLoged(LoginActivity.this, new ModelLogin(email,pass));
@@ -184,7 +184,7 @@ public class LoginActivity extends Activity {
             }
 
             @Override
-            public void onFailure(Call<BodyResponse> call, Throwable t) {
+            public void onFailure(Call<ModelBodyResponse> call, Throwable t) {
                 showProgress(false);
                 t.printStackTrace();
                 Toast.makeText(LoginActivity.this, "peticion al servidor fallida", Toast.LENGTH_LONG).show();;

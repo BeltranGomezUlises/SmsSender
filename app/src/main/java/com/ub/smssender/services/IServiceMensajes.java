@@ -1,5 +1,6 @@
 package com.ub.smssender.services;
 
+import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.models.ModelEnviado;
 import com.ub.smssender.models.ModelLogin;
 
@@ -14,18 +15,18 @@ import retrofit2.http.Path;
  * Created by ulises on 18/02/17.
  */
 
-public interface ServiceMensajes {
+public interface IServiceMensajes {
 
     //servidor 201.163.30.113
-    String END_POINT = "http://192.168.1.74:45200/api/";
+    String END_POINT = "http://201.163.30.113:45200/api/";
 
     @GET("mensajes/{usuarioId}/{imei}")
-    Call<BodyResponse> mensajes(@Header("Authorization") String token, @Path("usuarioId") String usuario, @Path("imei") String imei);
+    Call<ModelBodyResponse> mensajes(@Header("Authorization") String token, @Path("usuarioId") String usuario, @Path("imei") String imei);
 
 
     @POST("login")
-    Call<BodyResponse> login(@Body ModelLogin user);
+    Call<ModelBodyResponse> login(@Body ModelLogin user);
 
     @POST("enviado")
-    Call<BodyResponse> enviado(@Body ModelEnviado user);
+    Call<ModelBodyResponse> enviado(@Body ModelEnviado user);
 }

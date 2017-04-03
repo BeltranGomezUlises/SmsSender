@@ -8,7 +8,7 @@ import com.kirianov.multisim.MultiSimTelephonyManager;
  * Created by ulises on 25/02/17.
  */
 
-public class DualSim {
+public class DualSimInfoPrinter {
 
     private static MultiSimTelephonyManager multiSimTelephonyManager;
 

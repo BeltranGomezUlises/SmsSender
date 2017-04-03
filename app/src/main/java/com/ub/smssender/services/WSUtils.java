@@ -5,11 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ub.smssender.models.ModelMensaje;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by ulises on 22/02/17.
@@ -20,8 +17,8 @@ public class WSUtils {
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
 
-    public static ServiceMensajes webServices(){
-        return SRetrofit.getIntance().create(ServiceMensajes.class);
+    public static IServiceMensajes webServices(){
+        return SingletonRetrofit.getIntance().create(IServiceMensajes.class);
     }
 
     public static String asStringJson(Object object) throws JsonProcessingException {

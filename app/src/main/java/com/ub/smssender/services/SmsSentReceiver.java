@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.telephony.SmsManager;
 
 import com.ub.smssender.Main.MainActivity;
+import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.models.ModelEnviado;
 
 import retrofit2.Call;
@@ -53,25 +54,18 @@ public class SmsSentReceiver extends BroadcastReceiver{
     }
 
     private void capturarEnviado(final String smsId, final String imei, int estado, String error){
-         final Call<BodyResponse> call = WSUtils.webServices().enviado(new ModelEnviado(smsId, estado, error));
-            call.enqueue(new Callback<BodyResponse>() {
+         final Call<ModelBodyResponse> call = WSUtils.webServices().enviado(new ModelEnviado(smsId, estado, error));
+            call.enqueue(new Callback<ModelBodyResponse>() {
                 @Override
-                public void onResponse(Call<BodyResponse> call, Response<BodyResponse> response) {
+                public void onResponse(Call<ModelBodyResponse> call, Response<ModelBodyResponse> response) {
                     if (response.isSuccessful()){
                         //TODO aqui se podria hacer algo  despues de capturar como enviado
-                        System.out.println("enviado: " + smsId);
-                        if(MainActivity.txtMensajesEnviados.getText().toString().contains(imei)){
-                            MainActivity.contador++;
-                            MainActivity.txtMensajesEnviados.setText("Mensajes enviados IMEI 1: " + "\n" + MainActivity.contador);
-                        }else{
-                            MainActivity.contador2++;
-                            MainActivity.txtMensajesEnviados2.setText("Mensajes enviados IMEI 2: " + "\n" + MainActivity.contador2);
-                        }
+                        System.out.println("enviado: " + smsId + " Desde el imei: " + imei);
                     }
                 }
 
                 @Override
-                public void onFailure(Call<BodyResponse> call, Throwable t) {
+                public void onFailure(Call<ModelBodyResponse> call, Throwable t) {
                     System.out.println("no se logro capturar como enviado...");
                     t.printStackTrace();
                 }

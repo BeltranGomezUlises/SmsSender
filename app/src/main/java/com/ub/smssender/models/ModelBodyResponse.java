@@ -1,11 +1,11 @@
-package com.ub.smssender.services;
+package com.ub.smssender.models;
 
 /**
  * Created by Ulises Beltrán Gómez - beltrangomezulises@gmail.com
  * On 5/03/17.
  */
 
-public class BodyResponse {
+public class ModelBodyResponse {
 
     private boolean exito;
     private String mensaje;
@@ -37,7 +37,7 @@ public class BodyResponse {
 
     @Override
     public String toString() {
-        return "BodyResponse{" +
+        return "ModelBodyResponse{" +
                 "exito=" + exito +
                 ", mensaje='" + mensaje + '\'' +
                 ", datos=" + datos +

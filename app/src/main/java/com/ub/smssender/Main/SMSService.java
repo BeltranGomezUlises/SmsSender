@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.ub.smssender.models.ModelMensaje;
-import com.ub.smssender.services.BodyResponse;
+import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.services.SmsSentReceiver;
 import com.ub.smssender.services.WSUtils;
 import com.ub.smssender.utils.TelephonyInfo;
@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.telephony.SmsManager.getSmsManagerForSubscriptionId;
@@ -78,10 +76,10 @@ public class SMSService extends IntentService {
         List<String> imeiList = telephonyInfo.getImeiList();
         //for (final String imei : imeiList) {
         for(int j = 0;j < imeiList.size();j++){
-            //final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
-            final Call<BodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imeiList.get(j));
+            //final Call<ModelBodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
+            final Call<ModelBodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imeiList.get(j));
             try {
-                Response<BodyResponse> response = request.execute();
+                Response<ModelBodyResponse> response = request.execute();
                 if (response.body().isExito()){
                     System.out.println(response.body().toString());
                     try {

@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -24,6 +26,8 @@ import com.ub.smssender.models.ModelUsuario;
 import com.ub.smssender.utils.JWTDecoder;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
+import com.ub.smssender.views.adapters.ImeiListAdapter;
+import com.ub.smssender.views.models.ImeiViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,29 +38,23 @@ import static android.Manifest.permission;
 public class MainActivity extends Activity {
 
     private static final String[] PERMISOS =  {permission.READ_PHONE_STATE, permission.SEND_SMS};
-
-    private TextView txtImei;
     private TextView txtModel;
-    public static TextView txtMensajesEnviados;
-    public static TextView txtMensajesEnviados2;
-    public static int contador = 0;
-    public static int contador2 = 0;
-    public static List<String> imeis = new ArrayList<>(); //lista con los IMEI's
     private Button btnSalir;
     private Intent serviceIntent;
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    private List<ImeiViewModel> imeiModels = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtImei = (TextView) findViewById(R.id.txtImei);
-        txtModel = (TextView) findViewById(R.id.txtModel);
+        txtModel = (TextView) findViewById(R.id.tvModel);
         btnSalir = (Button) findViewById(R.id.btnSalir);
-        txtMensajesEnviados = (TextView) findViewById(R.id.txtMensajesEnviados);
-        txtMensajesEnviados2 = (TextView) findViewById(R.id.txtMensajesEnviados2);
-        txtMensajesEnviados.setText("Mensajes enviados del IMEI 1: " + "\n" + contador);
-        txtMensajesEnviados2.setText("Mensajes enviados del IMEI 2: " + "\n" + contador2);
 
         this.permisos(PERMISOS); //SOLICITAR PERMISOS
     }
@@ -83,18 +81,16 @@ public class MainActivity extends Activity {
         for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
             int subscriptionId = subscriptionInfo.getSubscriptionId();
             Log.d("info","subscriptionId:"+ subscriptionId +" name: " + subscriptionInfo.getDisplayName());
-
-            /*TO SEND A MESSAGE FRON A PARTICULAR SUSCRIPTION*/
-            //SmsManager.getSmsManagerForSubscriptionId(subscriptionId).sendTextMessage("12345678", null, "text", null, null);
         }
     }
 
     private void init(){
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
+
         for (String s : imeiList) {
-            imeis.add(s);
-            txtImei.setText(txtImei.getText() + "\n" + s);
+            ImeiViewModel model = new ImeiViewModel(s, 0);
+            imeiModels.add(model);
         }
 
         btnSalir.setOnClickListener(new View.OnClickListener() {
@@ -103,12 +99,20 @@ public class MainActivity extends Activity {
                 salirYDetener();
             }
         });
-        //this.temporalListener(imeiList);
-
         txtModel.setText(txtModel.getText() + "\n" + Build.MANUFACTURER + " " + Build.MODEL);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new ImeiListAdapter(imeiModels);
+        mRecyclerView.setAdapter(mAdapter);
 
         serviceIntent = new Intent(MainActivity.this, SMSService.class);
         MainActivity.this.startService(serviceIntent);
+
     }
 
     private void permisos(String[] listaPermisos) {
@@ -132,4 +136,11 @@ public class MainActivity extends Activity {
         MainActivity.this.finishAffinity();
     }
 
+    public void countSmsSended(String imei){
+
+    }
+
+
+
 }
+
