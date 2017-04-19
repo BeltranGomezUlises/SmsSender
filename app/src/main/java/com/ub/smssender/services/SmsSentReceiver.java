@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.SmsManager;
 
-import com.ub.smssender.Main.MainActivity;
+import com.ub.smssender.activities.MainActivity;
 import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.models.ModelEnviado;
 
@@ -27,7 +27,7 @@ public class SmsSentReceiver extends BroadcastReceiver{
         String imeiOutput = "";
         if(intent.getAction().equals("services.SMS_SENT")) {
             smsId = intent.getExtras().getString("smsId");
-            imeiOutput = intent.getExtras().getString("IMEIoutput");
+            imeiOutput = intent.getExtras().getString("imei");
         }
 
         if (!smsId.isEmpty()){
@@ -61,6 +61,7 @@ public class SmsSentReceiver extends BroadcastReceiver{
                     if (response.isSuccessful()){
                         //TODO aqui se podria hacer algo  despues de capturar como enviado
                         System.out.println("enviado: " + smsId + " Desde el imei: " + imei);
+                        MainActivity.incrementarEnviados(imei);
                     }
                 }
 

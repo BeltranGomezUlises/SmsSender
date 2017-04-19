@@ -1,4 +1,4 @@
-package com.ub.smssender.Main;
+package com.ub.smssender.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -172,7 +172,7 @@ public class LoginActivity extends Activity {
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
                         showProgress(false);
-                        finish();
+                        LoginActivity.this.finishAffinity();
                     }else{
                         showProgress(false);
                         Toast.makeText(LoginActivity.this, response.body().getMensaje(), Toast.LENGTH_LONG).show();;

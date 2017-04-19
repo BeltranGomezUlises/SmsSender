@@ -15,7 +15,16 @@ public class ModelMensaje {
     private String destino;
     private String envia;
     private String usuarioId;
+    private String fechaEnviar;
     private String __v;
+
+    public String getFechaEnviar() {
+        return fechaEnviar;
+    }
+
+    public void setFechaEnviar(String fechaEnviar) {
+        this.fechaEnviar = fechaEnviar;
+    }
 
     public String get_id() {
         return _id;

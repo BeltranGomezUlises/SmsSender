@@ -1,4 +1,4 @@
-package com.ub.smssender.Main;
+package com.ub.smssender.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,7 +10,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -19,11 +18,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ub.smssender.R;
-import com.ub.smssender.models.JWTBody;
-import com.ub.smssender.models.ModelUsuario;
-import com.ub.smssender.utils.JWTDecoder;
+import com.ub.smssender.services.SMSService;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
 import com.ub.smssender.views.adapters.ImeiListAdapter;
@@ -43,10 +39,10 @@ public class MainActivity extends Activity {
     private Intent serviceIntent;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private static RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private List<ImeiViewModel> imeiModels = new ArrayList<>();
+    private static List<ImeiViewModel> imeiModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +70,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finishAffinity();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     private void suscriptionInfo(){
         SubscriptionManager subscriptionManager = SubscriptionManager.from(getApplicationContext());
@@ -88,6 +90,7 @@ public class MainActivity extends Activity {
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
 
+        imeiModels = new ArrayList<>();
         for (String s : imeiList) {
             ImeiViewModel model = new ImeiViewModel(s, 0);
             imeiModels.add(model);
@@ -130,17 +133,23 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void salirYDetener(){
+    private void salirYDetener() {
+        //probar actualizar a vista de los cards
         UtilPreferences.LogOutPreferences(MainActivity.this);
         SMSService.stopTimer();
         MainActivity.this.finishAffinity();
     }
 
-    public void countSmsSended(String imei){
+    public static void incrementarEnviados(String imei){
+        for (ImeiViewModel imeiModel : imeiModels) {
+            if (imeiModel.getImei().equals(imei)){
+                imeiModel.incrementCounter();
+            }
+        }
+
+        mAdapter.notifyDataSetChanged();
 
     }
-
-
 
 }
 

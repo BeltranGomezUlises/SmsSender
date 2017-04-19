@@ -2,10 +2,8 @@ package com.ub.smssender.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ub.smssender.Main.MainActivity;
 import com.ub.smssender.models.JWTBody;
 import com.ub.smssender.models.ModelLogin;
 import com.ub.smssender.models.ModelUsuario;

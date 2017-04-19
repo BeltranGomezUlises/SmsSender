@@ -19,32 +19,43 @@
         <!--android:cardCornerRadius="4dp"-->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:padding="8dp">
+            android:layout_height="70dp">
 
-            <TextView
-                android:id="@+id/lbImei"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:text="Imei:"
-                android:textSize="16sp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toStartOf="@+id/relativeLayout"
+                android:padding="8dp">
 
-            <TextView
-                android:id="@+id/lbImeiNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/lbImei"
-                android:layout_marginRight="16dp"
-                android:text="789456132456798456"
-                android:textSize="18sp" />
+                <TextView
+                    android:id="@+id/lbImei"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:text="Imei:"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/lbImeiNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lbImei"
+                    android:layout_marginRight="16dp"
+                    android:text="789456132456798456"
+                    android:textSize="18sp" />
+
+            </RelativeLayout>
+
 
             <RelativeLayout
                 android:layout_width="100dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true">
+                android:layout_alignParentBottom="true"
+                android:id="@+id/relativeLayout"
+                android:padding="8dp"
+                android:background="@color/cardview_light_background">
 
                 <TextView
                     android:gravity="center"

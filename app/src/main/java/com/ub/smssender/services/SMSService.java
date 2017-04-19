@@ -1,4 +1,4 @@
-package com.ub.smssender.Main;
+package com.ub.smssender.services;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -11,8 +11,6 @@ import android.util.Log;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.ub.smssender.models.ModelMensaje;
 import com.ub.smssender.models.ModelBodyResponse;
-import com.ub.smssender.services.SmsSentReceiver;
-import com.ub.smssender.services.WSUtils;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
 
@@ -75,6 +73,7 @@ public class SMSService extends IntentService {
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
         //for (final String imei : imeiList) {
+        enviandoSMS = true;
         for(int j = 0;j < imeiList.size();j++){
             //final Call<ModelBodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imei);
             final Call<ModelBodyResponse> request = webServices().mensajes(UtilPreferences.loadToken(this), UtilPreferences.loadLogedUserId(SMSService.this), imeiList.get(j));
@@ -94,7 +93,7 @@ public class SMSService extends IntentService {
                             Intent in = new Intent("services.SMS_SENT");
                             in.putExtra("smsId", modelMensaje.get_id());
                             //in.putExtra("IMEIoutput",imei);
-                            in.putExtra("IMEIoutput",imeiList.get(j));
+                            in.putExtra("imei",imeiList.get(j));
                             sendBroadcast(in);
 
                             if (modelMensaje.getMensaje().length() > 160){
@@ -126,6 +125,7 @@ public class SMSService extends IntentService {
                 e.printStackTrace();
             }
         }
+        enviandoSMS = false;
     }
 
     private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, ArrayList<String> messageList, ArrayList<PendingIntent> pendingIntents){
