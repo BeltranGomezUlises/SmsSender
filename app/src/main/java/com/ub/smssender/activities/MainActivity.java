@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ub.smssender.R;
+import com.ub.smssender.models.ModelMensaje;
 import com.ub.smssender.services.SMSService;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
@@ -27,6 +28,8 @@ import com.ub.smssender.views.models.ImeiViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.Realm;
 
 import static android.Manifest.permission;
 
@@ -53,6 +56,15 @@ public class MainActivity extends Activity {
         btnSalir = (Button) findViewById(R.id.btnSalir);
 
         this.permisos(PERMISOS); //SOLICITAR PERMISOS
+
+        //limpiar db
+        Realm.init(getApplicationContext());
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(ModelMensaje.class);
+        realm.commitTransaction();
+        realm.close();
+
     }
 
     @Override

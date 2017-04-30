@@ -9,7 +9,11 @@ import android.telephony.SmsManager;
 import com.ub.smssender.activities.MainActivity;
 import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.models.ModelEnviado;
+import com.ub.smssender.models.ModelMensaje;
 
+import java.io.IOException;
+
+import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -54,23 +58,34 @@ public class SmsSentReceiver extends BroadcastReceiver{
     }
 
     private void capturarEnviado(final String smsId, final String imei, int estado, String error){
-         final Call<ModelBodyResponse> call = WSUtils.webServices().enviado(new ModelEnviado(smsId, estado, error));
-            call.enqueue(new Callback<ModelBodyResponse>() {
-                @Override
-                public void onResponse(Call<ModelBodyResponse> call, Response<ModelBodyResponse> response) {
-                    if (response.isSuccessful()){
-                        //TODO aqui se podria hacer algo  despues de capturar como enviado
+        final Call<ModelBodyResponse> call = WSUtils.webServices().enviado(new ModelEnviado(smsId, estado, error));
+
+        call.enqueue(new Callback<ModelBodyResponse>() {
+            @Override
+            public void onResponse(Call<ModelBodyResponse> call, Response<ModelBodyResponse> response) {
+                if (response.isSuccessful()){
+                    if (response.body().isExito()){
                         System.out.println("enviado: " + smsId + " Desde el imei: " + imei);
                         MainActivity.incrementarEnviados(imei);
-                    }
-                }
 
-                @Override
-                public void onFailure(Call<ModelBodyResponse> call, Throwable t) {
-                    System.out.println("no se logro capturar como enviado...");
-                    t.printStackTrace();
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        ModelMensaje mensaje = realm.where(ModelMensaje.class).equalTo("_id", smsId).findFirst();
+                        mensaje.deleteFromRealm();
+                        realm.commitTransaction();
+                    }
+                }else{
+                    System.out.println("no se pudo capturar de enviado, mensajeId: " + smsId);
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(Call<ModelBodyResponse> call, Throwable t) {
+                System.out.println("no se pudo capturar de enviado, mensajeId: " + smsId);
+                t.printStackTrace();
+            }
+        });
+
     }
 
 }

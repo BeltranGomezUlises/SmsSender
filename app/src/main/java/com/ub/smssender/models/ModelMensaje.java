@@ -2,13 +2,17 @@ package com.ub.smssender.models;
 
 import java.util.Date;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by Ulises Beltrán Gómez - beltrangomezulises@gmail.com
  * On 5/03/17.
  */
 
-public class ModelMensaje {
+public class ModelMensaje extends RealmObject{
 
+    @PrimaryKey
     private String _id;
     private String mensaje;
     private String tipo;
@@ -16,7 +20,18 @@ public class ModelMensaje {
     private String envia;
     private String usuarioId;
     private String fechaEnviar;
+
+    //estado 0 = no se ha intentado enviar, estado 1 = se envió a la antena
+    private int estado;
     private String __v;
+
+    public int getEstado() {
+        return estado;
+    }
+
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
 
     public String getFechaEnviar() {
         return fechaEnviar;
@@ -82,4 +97,17 @@ public class ModelMensaje {
         this.__v = __v;
     }
 
+    @Override
+    public String toString() {
+        return "ModelMensaje{" +
+                "_id='" + _id + '\'' +
+                ", mensaje='" + mensaje + '\'' +
+                ", tipo='" + tipo + '\'' +
+                ", destino='" + destino + '\'' +
+                ", envia='" + envia + '\'' +
+                ", usuarioId='" + usuarioId + '\'' +
+                ", fechaEnviar='" + fechaEnviar + '\'' +
+                ", estado=" + estado +
+                '}';
+    }
 }
