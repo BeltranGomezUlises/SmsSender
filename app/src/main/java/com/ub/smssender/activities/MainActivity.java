@@ -1,6 +1,5 @@
 package com.ub.smssender.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -8,11 +7,14 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,7 +36,7 @@ import io.realm.Realm;
 import static android.Manifest.permission;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String[] PERMISOS =  {permission.READ_PHONE_STATE, permission.SEND_SMS};
     private TextView txtModel;
@@ -64,6 +66,26 @@ public class MainActivity extends Activity {
         realm.delete(ModelMensaje.class);
         realm.commitTransaction();
         realm.close();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.option_configuracion:
+
+                Intent intent = new Intent(MainActivity.this, ConfiguracionActivity.class);
+                startActivity(intent);
+
+                return true;
+            default:return super.onOptionsItemSelected(item);
+        }
 
     }
 

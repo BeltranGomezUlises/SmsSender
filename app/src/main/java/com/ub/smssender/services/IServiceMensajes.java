@@ -18,11 +18,11 @@ import retrofit2.http.Path;
 public interface IServiceMensajes {
 
 
-    String END_POINT = "http://201.163.30.113:45200/api/";
-    //String END_POINT = "http://192.168.1.74:45200/api/";
+    //String END_POINT = "http://201.163.30.113:45200/api/";
+    String END_POINT = "http://192.168.1.67:45200/api/";
 
-    @GET("mensajes/{usuarioId}/{imei}")
-    Call<ModelBodyResponse> mensajes(@Header("Authorization") String token, @Path("usuarioId") String usuario, @Path("imei") String imei);
+    @GET("mensajes/{usuarioId}/{imei}/{numMensajes}")
+    Call<ModelBodyResponse> mensajes(@Header("Authorization") String token, @Path("usuarioId") String usuario, @Path("imei") String imei, @Path("numMensajes") int numSMS);
 
 
     @POST("login")

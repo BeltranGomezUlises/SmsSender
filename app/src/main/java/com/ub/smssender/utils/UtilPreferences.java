@@ -3,6 +3,7 @@ package com.ub.smssender.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.fasterxml.jackson.core.util.InternCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ub.smssender.models.JWTBody;
 import com.ub.smssender.models.ModelLogin;
@@ -19,6 +20,8 @@ public class UtilPreferences {
     private static final String USER = "usuario";
     private static final String PASS = "password";
     private static final String LOGED = "loged";
+    private static final String INTERVAL_TIME = "interval_time";
+    private static final String NUM_MENSAJES = "num_mensajes";
 
     private static final String TOKEN = "token";
 
@@ -56,7 +59,6 @@ public class UtilPreferences {
         editor.commit();
     }
 
-
     public static String loadToken(Context context){
         SharedPreferences settings = context.getSharedPreferences(TOKEN, 0);
         return settings.getString(TOKEN, "");
@@ -74,5 +76,32 @@ public class UtilPreferences {
             return null;
         }
     }
+
+    public static void saveIntervalTime(Context context, int segundos){
+        SharedPreferences settings = context.getSharedPreferences(INTERVAL_TIME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(INTERVAL_TIME, segundos);
+        editor.commit();
+    }
+
+    public static int loadIntervalTime(Context context){
+        SharedPreferences settings = context.getSharedPreferences(INTERVAL_TIME, 0);
+        return settings.getInt(INTERVAL_TIME, 10);
+
+    }
+
+    public static void saveNumMensajes(Context context, int mensajes){
+        SharedPreferences settings = context.getSharedPreferences(NUM_MENSAJES, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(NUM_MENSAJES, mensajes);
+        editor.commit();
+    }
+
+    public static int loadNumMensajes(Context context){
+        SharedPreferences settings = context.getSharedPreferences(NUM_MENSAJES, 0);
+        return settings.getInt(NUM_MENSAJES, 5);
+
+    }
+
 
 }

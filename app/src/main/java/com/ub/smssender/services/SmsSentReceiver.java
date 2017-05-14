@@ -40,6 +40,9 @@ public class SmsSentReceiver extends BroadcastReceiver{
                 case Activity.RESULT_OK:
                     this.capturarEnviado(smsId, imeiOutput, 1, "RESULT_OK");
                     break;
+                case Activity.RESULT_CANCELED:
+                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_CANCELED");
+                    break;
                 case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                     this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_GENERIC_FAILURE");
                     break;
@@ -53,7 +56,6 @@ public class SmsSentReceiver extends BroadcastReceiver{
                     this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_RADIO_OFF");
                     break;
             }
-            //se envió este mensaje, continuar con los demas
         }
     }
 

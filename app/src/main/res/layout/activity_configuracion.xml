@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="6dp"
+    tools:context="com.ub.smssender.activities.ConfiguracionActivity">
+
+
+    <RelativeLayout
+        android:id="@+id/layout_tiempo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:gravity="center|right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Intervalo de tiempo en segundos:"
+            android:textSize="14sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/edt_intervalo"
+            android:layout_marginRight="5dp"/>
+
+        <EditText
+            android:maxLength="3"
+            android:id="@+id/edt_intervalo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:ems="10"
+            android:inputType="numberSigned"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_below="@+id/layout_tiempo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:gravity="center|right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mensajes por peticion:"
+            android:textSize="14sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/edt_numMensajes"
+            android:layout_marginRight="5dp"/>
+
+        <EditText
+            android:maxLength="3"
+            android:id="@+id/edt_numMensajes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:ems="10"
+            android:inputType="numberSigned"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/bottomBar"
+        android:elevation="10dp"
+        android:translationZ="10dp"
+        android:background="@drawable/myrect">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/btnCancelar"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/btnGuardar"
+                android:layout_alignBottom="@+id/btnGuardar"
+                android:layout_alignParentStart="true"
+                android:layout_margin="5dp"
+                android:layout_marginStart="56dp"
+                android:text="Candelar" />
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/btnGuardar"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="5dp"
+                android:layout_marginEnd="44dp"
+                android:text="Guardar" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+
+
+</RelativeLayout>
