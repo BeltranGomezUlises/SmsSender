@@ -8,16 +8,17 @@
     tools:context="com.ub.smssender.activities.ConfiguracionActivity">
 
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/layout_tiempo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
 
         <TextView
-            android:gravity="center|right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="Intervalo de tiempo en segundos:"
             android:textSize="14sp"
             android:layout_centerVertical="true"
@@ -26,27 +27,29 @@
             android:layout_marginRight="5dp"/>
 
         <EditText
+            android:layout_weight="1"
             android:maxLength="3"
             android:id="@+id/edt_intervalo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:ems="10"
             android:inputType="numberSigned"
             android:layout_alignParentEnd="true" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_below="@+id/layout_tiempo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
 
         <TextView
-            android:gravity="center|right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="Mensajes por peticion:"
             android:textSize="14sp"
             android:layout_centerVertical="true"
@@ -55,16 +58,17 @@
             android:layout_marginRight="5dp"/>
 
         <EditText
+            android:layout_weight="1"
             android:maxLength="3"
             android:id="@+id/edt_numMensajes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:ems="10"
             android:inputType="numberSigned"
             android:layout_alignParentEnd="true" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"

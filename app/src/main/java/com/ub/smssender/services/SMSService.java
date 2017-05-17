@@ -36,6 +36,8 @@ public class SMSService extends IntentService {
 
     private static Timer timer;
     private String SENT = "SMS_SENT";
+    private String DELIVERED = "SMS_RECEIVED";
+
     private List<String> imeiList;
 
     public SMSService() {
@@ -54,7 +56,13 @@ public class SMSService extends IntentService {
         imeiList = telephonyInfo.getImeiList();
 
         Realm.init(getApplicationContext());
+
+        //registrar receivers
         registerReceiver(new SmsSentReceiver(), new IntentFilter(SENT));
+        registerReceiver(new SmsDeliveredReceiver(), new IntentFilter(DELIVERED));
+
+
+        //arancar timer
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -78,16 +86,16 @@ public class SMSService extends IntentService {
         if (mensajes.size() == 0) {
             solicitarPaqueteMensajes();
         } else {
-            System.out.println("aun tengo mensajes por enviar: " + mensajes);
+           // System.out.println("aun tengo mensajes por enviar: " + mensajes);
             enviarMensaje(mensajes);
         }
         realm.close();
     }
 
     private void solicitarPaqueteMensajes() {
-        System.out.println("Solicitando mensajes...");
+        //System.out.println("Solicitando mensajes...");
         for (int j = 0; j < imeiList.size(); j++) {
-            System.out.println("...");
+            //System.out.println("...");
             final Call<ModelBodyResponse> request = webServices().mensajes(
                     UtilPreferences.loadToken(this),
                     UtilPreferences.loadLogedUserId(SMSService.this),
@@ -103,13 +111,13 @@ public class SMSService extends IntentService {
             try {
                 Response<ModelBodyResponse> response = request.execute();
                 if (response.body().isExito()) {
-                    System.out.println(response.body().toString());
+                    //System.out.println(response.body().toString());
                     try {
                         List<ModelMensaje> modelMensajes = WSUtils.readValue(response.body().getDatos(), new TypeReference<List<ModelMensaje>>() {
                         });
                         if (modelMensajes.size() == 0) {
                             //System.out.println("No hay ningun mensaje para mi, usuario: " + UtilPreferences.loadLogedUserId(SMSService.this) +  " imei: " + imei);
-                            System.out.println("No hay ningun mensaje para mi, imei: " + imeiList.get(j));
+                            //System.out.println("No hay ningun mensaje para mi, imei: " + imeiList.get(j));
                             continue;
                         } else {
                             Realm realm = Realm.getDefaultInstance();
@@ -133,7 +141,7 @@ public class SMSService extends IntentService {
                 e.printStackTrace();
             }
         }
-        System.out.println("mensajes solicitados y guardados");
+        //System.out.println("mensajes solicitados y guardados");
     }
 
 
@@ -143,13 +151,17 @@ public class SMSService extends IntentService {
 
 
         for (ModelMensaje modelMensaje : mensajes) {
-            System.out.println("enviando mensaje: " + modelMensaje.get_id() + " para: " + modelMensaje.getDestino());
+            //System.out.println("enviando mensaje: " + modelMensaje.get_id() + " para: " + modelMensaje.getDestino());
 
-            Intent in = new Intent("services.SMS_SENT");
-            in.putExtra("smsId", modelMensaje.get_id());
-            //in.putExtra("IMEIoutput",imei);
-            in.putExtra("imei", modelMensaje.getEnvia());
-            sendBroadcast(in);
+            Intent intentSend = new Intent("services.SMS_SENT");
+            intentSend.putExtra("smsId", modelMensaje.get_id());
+            intentSend.putExtra("imei", modelMensaje.getEnvia());
+            sendBroadcast(intentSend);
+
+            Intent intendDelivered = new Intent("services.SMS_RECEIVED");
+            intendDelivered.putExtra("smsId", modelMensaje.get_id());
+            intendDelivered.putExtra("imei", modelMensaje.getEnvia());
+            sendBroadcast(intendDelivered);
 
             realm.beginTransaction();
             //actualizar el estado del
@@ -159,15 +171,19 @@ public class SMSService extends IntentService {
             realm.commitTransaction();
             if (modelMensaje.getMensaje().length() > 160) {
                 ArrayList<String> messageList = SmsManager.getDefault().divideMessage(modelMensaje.getMensaje());
-                ArrayList<PendingIntent> pendingIntents = new ArrayList<>();
+                ArrayList<PendingIntent> SendPendingIntents = new ArrayList<>();
+                ArrayList<PendingIntent> DeliveredPendingIntents = new ArrayList<>();
 
                 for (int i = 0; i < messageList.size(); i++) {
-                    pendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT));
+                    SendPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT));
+                    DeliveredPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT));
                 }
-                this.sendSMS(imeiList.indexOf(modelMensaje.getEnvia()) + 1, modelMensaje, messageList, pendingIntents);
+                this.sendSMS(imeiList.indexOf(modelMensaje.getEnvia()) + 1, modelMensaje, messageList, SendPendingIntents,DeliveredPendingIntents);
             } else {
                 PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
-                this.sendSMS(imeiList.indexOf(modelMensaje.getEnvia()) + 1, modelMensaje, sentPI);
+                PendingIntent deliveredPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT);
+
+                this.sendSMS(imeiList.indexOf(modelMensaje.getEnvia()) + 1, modelMensaje, sentPI, deliveredPI);
             }
 
             try {
@@ -179,19 +195,19 @@ public class SMSService extends IntentService {
         realm.close();
     }
 
-    private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, ArrayList<String> messageList, ArrayList<PendingIntent> pendingIntents) {
+    private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, ArrayList<String> messageList, ArrayList<PendingIntent> SendPendingIntent, ArrayList<PendingIntent> DeliveredPendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            getSmsManagerForSubscriptionId(subscriptionIndex).sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+            getSmsManagerForSubscriptionId(subscriptionIndex).sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, SendPendingIntent, DeliveredPendingIntent);
         } else {
-            SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, pendingIntents, null);
+            SmsManager.getDefault().sendMultipartTextMessage(modelMensaje.getDestino(), null, messageList, SendPendingIntent, DeliveredPendingIntent);
         }
     }
 
-    private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, PendingIntent sentPI) {
+    private void sendSMS(int subscriptionIndex, ModelMensaje modelMensaje, PendingIntent sentPI, PendingIntent deliveredPI) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            getSmsManagerForSubscriptionId(subscriptionIndex).sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+            getSmsManagerForSubscriptionId(subscriptionIndex).sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, deliveredPI);
         } else {
-            SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, null);
+            SmsManager.getDefault().sendTextMessage(modelMensaje.getDestino(), null, modelMensaje.getMensaje(), sentPI, deliveredPI);
         }
     }
 

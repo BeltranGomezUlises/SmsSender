@@ -17,7 +17,7 @@ public class WSUtils {
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
 
-    public static IServiceMensajes webServices(){
+    public static IServiceMensajes webServices() {
         return SingletonRetrofit.getIntance().create(IServiceMensajes.class);
     }
 
