@@ -1,4 +1,4 @@
-package com.ub.smssender.models;
+package com.ub.smssender.entities;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
  * On 5/03/17.
  */
 
-public class ModelMensaje extends RealmObject{
+public class MensajeRealm extends RealmObject{
 
     @PrimaryKey
     private String _id;
@@ -99,7 +99,7 @@ public class ModelMensaje extends RealmObject{
 
     @Override
     public String toString() {
-        return "ModelMensaje{" +
+        return "MensajeRealm{" +
                 "_id='" + _id + '\'' +
                 ", mensaje='" + mensaje + '\'' +
                 ", tipo='" + tipo + '\'' +

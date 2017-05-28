@@ -7,11 +7,10 @@ import android.content.Intent;
 import android.telephony.SmsManager;
 
 import com.ub.smssender.activities.MainActivity;
+import com.ub.smssender.entities.ImeiRealm;
+import com.ub.smssender.entities.MensajeRealm;
 import com.ub.smssender.models.ModelBodyResponse;
 import com.ub.smssender.models.ModelEnviado;
-import com.ub.smssender.models.ModelMensaje;
-
-import java.io.IOException;
 
 import io.realm.Realm;
 import retrofit2.Call;
@@ -80,8 +79,13 @@ public class SmsSentReceiver extends BroadcastReceiver{
 
                         Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
-                        ModelMensaje mensaje = realm.where(ModelMensaje.class).equalTo("_id", smsId).findFirst();
+
+                        ImeiRealm imeiRealm = realm.where(ImeiRealm.class).equalTo("imei", imei).findFirst();
+                        imeiRealm.setCounter(imeiRealm.getCounter() + 1);
+
+                        MensajeRealm mensaje = realm.where(MensajeRealm.class).equalTo("_id", smsId).findFirst();
                         mensaje.deleteFromRealm();
+
                         realm.commitTransaction();
                     }
                 }else{

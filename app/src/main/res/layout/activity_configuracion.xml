@@ -112,7 +112,15 @@
 
     </RelativeLayout>
 
-
+    <Button
+        android:id="@+id/btnLimpiarContadores"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottomBar"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="16dp"
+        android:text="Limpiar Contadores" />
 
 
 </RelativeLayout>

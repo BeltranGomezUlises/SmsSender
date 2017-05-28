@@ -1,6 +1,7 @@
 package com.ub.smssender.activities;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,8 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ub.smssender.R;
-import com.ub.smssender.models.ModelMensaje;
+import com.ub.smssender.entities.ImeiRealm;
 import com.ub.smssender.services.SMSService;
+import com.ub.smssender.services.SmsDeliveredReceiver;
+import com.ub.smssender.services.SmsSentReceiver;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
 import com.ub.smssender.views.adapters.ImeiListAdapter;
@@ -38,16 +41,31 @@ import static android.Manifest.permission;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String[] PERMISOS =  {permission.READ_PHONE_STATE, permission.SEND_SMS};
-    private TextView txtModel;
-    private Button btnSalir;
+    private static final String[] PERMISOS = {permission.READ_PHONE_STATE, permission.SEND_SMS};
+    private static RecyclerView.Adapter mAdapter;
+    private static List<ImeiViewModel> imeiModels;
     private Intent serviceIntent;
 
+    private TextView txtModel;
+    private Button btnSalir;
     private RecyclerView mRecyclerView;
-    private static RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private static List<ImeiViewModel> imeiModels;
+    public static void incrementarEnviados(String imei) {
+        for (ImeiViewModel imeiModel : imeiModels) {
+            if (imeiModel.getImei().equals(imei)) {
+                imeiModel.incrementCounter();
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public static void borrarContadores() {
+        for (ImeiViewModel imeiModel : imeiModels) {
+            imeiModel.borrarContador();
+        }
+        mAdapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +79,11 @@ public class MainActivity extends AppCompatActivity {
 
         //limpiar db
         Realm.init(getApplicationContext());
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.delete(ModelMensaje.class);
-        realm.commitTransaction();
-        realm.close();
+//        Realm realm = Realm.getDefaultInstance();
+//        realm.beginTransaction();
+//        realm.delete(MensajeRealm.class);
+//        realm.commitTransaction();
+//        realm.close();
 
     }
 
@@ -77,29 +95,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.option_configuracion:
 
                 Intent intent = new Intent(MainActivity.this, ConfiguracionActivity.class);
                 startActivity(intent);
 
                 return true;
-            default:return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         boolean todosLosPermisos = true;
         for (int grantResult : grantResults) {
-            if (grantResult != 0){
+            if (grantResult != 0) {
                 todosLosPermisos = false;
             }
         }
-        if (todosLosPermisos){
+        if (todosLosPermisos) {
             init();
-        }else{
+        } else {
             Toast.makeText(MainActivity.this, "Se necesitan todos los permisos para operar", Toast.LENGTH_LONG).show();
         }
     }
@@ -111,28 +130,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
-    private void suscriptionInfo(){
+    private void suscriptionInfo() {
         SubscriptionManager subscriptionManager = SubscriptionManager.from(getApplicationContext());
         List<SubscriptionInfo> subscriptionInfoList = subscriptionManager.getActiveSubscriptionInfoList();
         for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
             int subscriptionId = subscriptionInfo.getSubscriptionId();
-            Log.d("info","subscriptionId:"+ subscriptionId +" name: " + subscriptionInfo.getDisplayName());
+            Log.d("info", "subscriptionId:" + subscriptionId + " name: " + subscriptionInfo.getDisplayName());
         }
     }
 
-    private void init(){
+    private void init() {
+        System.out.println("ejecucion de init");
         TelephonyInfo telephonyInfo = TelephonyInfo.getInstance(this);
         List<String> imeiList = telephonyInfo.getImeiList();
 
+        Realm.init(MainActivity.this);
+        Realm r = Realm.getDefaultInstance();
+
         imeiModels = new ArrayList<>();
         for (String s : imeiList) {
-            ImeiViewModel model = new ImeiViewModel(s, 0);
+
+            ImeiRealm imeiRealm = r.where(ImeiRealm.class).equalTo("imei", s).findFirst();
+            ImeiViewModel model;
+
+            if (imeiRealm != null) {
+                model = new ImeiViewModel(s, imeiRealm.getCounter(), imeiRealm.isActivo());
+            } else {
+                //si es nulo inicilizar ImeiRealm por primera vez
+                r.beginTransaction();
+                imeiRealm = new ImeiRealm(s, 0, true);
+                r.copyToRealm(imeiRealm);
+                r.commitTransaction();
+
+                model = new ImeiViewModel(s, 0, true);
+            }
+
             imeiModels.add(model);
         }
+        r.close();
 
         btnSalir.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 salirYDetener();
             }
         });
@@ -144,25 +183,28 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new ImeiListAdapter(imeiModels);
+        mAdapter = new ImeiListAdapter(imeiModels, this);
         mRecyclerView.setAdapter(mAdapter);
 
-        serviceIntent = new Intent(MainActivity.this, SMSService.class);
-        MainActivity.this.startService(serviceIntent);
+        //registrar receivers
+        registerReceiver(new SmsSentReceiver(), new IntentFilter(SMSService.SENT));
+        registerReceiver(new SmsDeliveredReceiver(), new IntentFilter(SMSService.DELIVERED));
 
+        serviceIntent = new Intent(MainActivity.this, SMSService.class);
+        this.startService(serviceIntent);
     }
 
     private void permisos(String[] listaPermisos) {
         boolean validos = true;
         for (String permiso : PERMISOS) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, permiso) != PackageManager.PERMISSION_GRANTED){
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permiso) != PackageManager.PERMISSION_GRANTED) {
                 validos = false;
                 break;
             }
         }
         if (!validos) { //pedir permisos
             ActivityCompat.requestPermissions(MainActivity.this, listaPermisos, 1);
-        }else{ //permisos garantizados
+        } else { //permisos garantizados
             init();
         }
     }
@@ -174,16 +216,16 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.this.finishAffinity();
     }
 
-    public static void incrementarEnviados(String imei){
-        for (ImeiViewModel imeiModel : imeiModels) {
-            if (imeiModel.getImei().equals(imei)){
-                imeiModel.incrementCounter();
-            }
+    public void restartService(){
+        if (serviceIntent != null) {
+            this.stopService(serviceIntent);
+            SMSService.stopTimer();
+            this.startService(serviceIntent);
+        }else{
+            this.startService(serviceIntent);
         }
-
-        mAdapter.notifyDataSetChanged();
-
     }
+
 
 }
 

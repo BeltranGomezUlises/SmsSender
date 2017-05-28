@@ -1,19 +1,31 @@
-package com.ub.smssender.views.models;
+package com.ub.smssender.entities;
 
 import java.util.Objects;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by Ulises Beltrán Gómez - beltrangomezulises@gmail.com
- * On 2/04/17.
+ * On 18/05/17.
  */
 
-public class ImeiViewModel {
+public class ImeiRealm extends RealmObject{
 
+    @PrimaryKey
     private String imei;
     private int counter;
     private boolean activo;
 
-    public ImeiViewModel(String imei, int counter, boolean activo) {
+    public ImeiRealm() {
+    }
+
+    public ImeiRealm(String imei) {
+        this.imei = imei;
+        counter = 0;
+    }
+
+    public ImeiRealm(String imei, int counter, boolean activo) {
         this.imei = imei;
         this.counter = counter;
         this.activo = activo;
@@ -39,24 +51,17 @@ public class ImeiViewModel {
         return counter;
     }
 
-    public void setCounter(int contador) {
+    public void setCounter(int counter) {
         this.counter = counter;
     }
 
-    public void incrementCounter(){
-        this.counter++;
-    }
-
-    public void borrarContador(){
-        this.counter = 0;
-    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ImeiViewModel that = (ImeiViewModel) o;
-        return counter == that.counter &&
-                Objects.equals(imei, that.imei);
+        ImeiRealm imeiRealm = (ImeiRealm) o;
+        return counter == imeiRealm.counter &&
+                Objects.equals(imei, imeiRealm.imei);
     }
 
     @Override
@@ -66,7 +71,7 @@ public class ImeiViewModel {
 
     @Override
     public String toString() {
-        return "ImeiViewModel{" +
+        return "ImeiRealm{" +
                 "imei='" + imei + '\'' +
                 ", counter=" + counter +
                 ", activo=" + activo +
