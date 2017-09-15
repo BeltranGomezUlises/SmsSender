@@ -16,9 +16,11 @@ import com.ub.smssender.models.ModelEnviado;
 import com.ub.smssender.utils.Constantes;
 import com.ub.smssender.utils.TelephonyInfo;
 import com.ub.smssender.utils.UtilPreferences;
+import com.ub.smssender.utils.UtilsDate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -97,11 +99,11 @@ public class SMSService extends IntentService {
                         imeiList.get(j),
                         UtilPreferences.loadNumMensajes(SMSService.this)
                 );
-                //impresion de parametros de la peticion
-                //            System.out.println("token: " + UtilPreferences.loadToken(this));
-//            System.out.println("userID: " + UtilPreferences.loadLogedUserId(SMSService.this));
-//            System.out.println("imei: " + imeiList.get(j));
-//            System.out.println("numMensajes: " + UtilPreferences.loadNumMensajes(SMSService.this));
+                 //impresion de parametros de la peticion
+//               System.out.println("token: " + UtilPreferences.loadToken(this));
+//               System.out.println("userID: " + UtilPreferences.loadLogedUserId(SMSService.this));
+//               System.out.println("imei: " + imeiList.get(j));
+//               System.out.println("numMensajes: " + UtilPreferences.loadNumMensajes(SMSService.this));
 
                 try {
                     Response<ModelBodyResponse> response = request.execute();
@@ -115,14 +117,15 @@ public class SMSService extends IntentService {
                                 System.out.println("No hay ningun mensaje para mi, imei: " + imeiList.get(j));
                                 continue;
                             } else {
+                                System.out.println("Hay mensajes para mi, imei: " +  imeiList.get(j));
                                 realm.beginTransaction();
                                 for (MensajeRealm m : mensajeRealms) {
                                     if (realm.where(MensajeRealm.class).equalTo("_id", m.get_id()).findFirst() == null) { //si no existe de forma local
                                         realm.copyToRealm(m);
+                                        System.out.println(m);
                                     }
                                 }
                                 realm.commitTransaction();
-
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -135,8 +138,8 @@ public class SMSService extends IntentService {
                     e.printStackTrace();
                 }
             }
-            realm.close();
         }
+        realm.close();
         //System.out.println("mensajes solicitados y guardados");
     }
 
@@ -163,7 +166,7 @@ public class SMSService extends IntentService {
 
             System.out.println("mensaje a enviar: " + mensajeRealm);
             if (mensajeRealm.getEstado() >= 3) {
-                //capturar mensaje como imposible de enviar despuesd e 3 intentos
+                //capturar mensaje como imposible de enviar despues de 3 intentos
                 try {
                     ModelEnviado enviado = new ModelEnviado(mensajeRealm.get_id(), 2, "imposible enviar despues de 3 intentos");
 
@@ -190,38 +193,49 @@ public class SMSService extends IntentService {
                     e.printStackTrace();
                 }
             } else {
-                realm.beginTransaction();
-                //actualizar el estado del mensaje
-                mensajeRealm.setEstado(mensajeRealm.getEstado() + 1);
-                realm.copyToRealmOrUpdate(mensajeRealm);
-
-                realm.commitTransaction();
-                if (mensajeRealm.getMensaje().length() > 160) {
-                    ArrayList<String> messageList = SmsManager.getDefault().divideMessage(mensajeRealm.getMensaje());
-                    ArrayList<PendingIntent> SendPendingIntents = new ArrayList<>();
-                    ArrayList<PendingIntent> DeliveredPendingIntents = new ArrayList<>();
-
-                    for (int i = 0; i < messageList.size(); i++) {
-                        SendPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT));
-                        DeliveredPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT));
+                //solo si ya pasó 1 minuto, desde el ultimo intento de envio, intentar enviar de nuevo
+                if (mensajeRealm.getFechaUltimoIntentoEnvio() != null){
+                    if (UtilsDate.diferenciaEnMinutos(new Date(), mensajeRealm.getFechaUltimoIntentoEnvio()) >= 1 ){
+                        this.procesoDeEnvio(realm, mensajeRealm);
                     }
-                    this.sendSMS(imeiList.indexOf(mensajeRealm.getEnvia()) + 1, mensajeRealm, messageList, SendPendingIntents, DeliveredPendingIntents);
-                } else {
-                    PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
-                    PendingIntent deliveredPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT);
-
-                    this.sendSMS(imeiList.indexOf(mensajeRealm.getEnvia()) + 1, mensajeRealm, sentPI, deliveredPI);
+                }else{
+                    this.procesoDeEnvio(realm, mensajeRealm);
                 }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
-
         }
         realm.close();
+    }
+
+    private void procesoDeEnvio(Realm realm, MensajeRealm mensajeRealm){
+        //actualizar el estado del mensaje
+        realm.beginTransaction();
+        mensajeRealm.setEstado(mensajeRealm.getEstado() + 1);
+        mensajeRealm.setFechaUltimoIntentoEnvio(new Date());
+        realm.copyToRealmOrUpdate(mensajeRealm);
+        realm.commitTransaction();
+
+        ArrayList<String> messageList = SmsManager.getDefault().divideMessage(mensajeRealm.getMensaje());
+        if (messageList.size() > 1) {
+            ArrayList<PendingIntent> SendPendingIntents = new ArrayList<>();
+            ArrayList<PendingIntent> DeliveredPendingIntents = new ArrayList<>();
+
+            for (int i = 0; i < messageList.size(); i++) {
+                SendPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT));
+                DeliveredPendingIntents.add(PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT));
+            }
+            this.sendSMS(imeiList.indexOf(mensajeRealm.getEnvia()) + 1, mensajeRealm, messageList, SendPendingIntents, DeliveredPendingIntents);
+        } else {
+            PendingIntent sentPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(SENT), PendingIntent.FLAG_ONE_SHOT);
+            PendingIntent deliveredPI = PendingIntent.getBroadcast(SMSService.this, 0, new Intent(DELIVERED), PendingIntent.FLAG_ONE_SHOT);
+
+            this.sendSMS(imeiList.indexOf(mensajeRealm.getEnvia()) + 1, mensajeRealm, sentPI, deliveredPI);
+        }
+        try {
+            Thread.sleep(700);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendSMS(int subscriptionIndex, MensajeRealm mensajeRealm, ArrayList<String> messageList, ArrayList<PendingIntent> SendPendingIntent, ArrayList<PendingIntent> DeliveredPendingIntent) {

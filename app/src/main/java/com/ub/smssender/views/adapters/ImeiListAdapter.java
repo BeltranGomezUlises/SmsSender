@@ -50,7 +50,7 @@ public class ImeiListAdapter extends RecyclerView.Adapter<ImeiListAdapter.ImeiVi
 
         holder.imeiActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                System.out.println(imeiList.get(i).getImei() + " esta: " + isChecked );
+                System.out.println(imeiList.get(i).getImei() + " está: " + isChecked );
 
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();

@@ -23,7 +23,16 @@ public class MensajeRealm extends RealmObject{
 
     //estado 0 = no se ha intentado enviar, estado 1 = se envió a la antena
     private int estado;
+    private Date fechaUltimoIntentoEnvio;
     private String __v;
+
+    public Date getFechaUltimoIntentoEnvio() {
+        return fechaUltimoIntentoEnvio;
+    }
+
+    public void setFechaUltimoIntentoEnvio(Date fechaUltimoIntentoEnvio) {
+        this.fechaUltimoIntentoEnvio = fechaUltimoIntentoEnvio;
+    }
 
     public int getEstado() {
         return estado;

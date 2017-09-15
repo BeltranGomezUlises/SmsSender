@@ -29,38 +29,37 @@ public class SmsSentReceiver extends BroadcastReceiver{
         String smsId = "";
         String imeiOutput = "";
 
-        //System.out.println("accion de SmsSentReceiver: " + intent.getAction());
+        System.out.println("accion de SmsSentReceiver: " + intent.getAction());
         if(intent.getAction().equals("services.SMS_SENT")) {
             smsId = intent.getExtras().getString("smsId");
             imeiOutput = intent.getExtras().getString("imei");
         }
 
         if (!smsId.isEmpty()){
-            switch (getResultCode())
-            {
+            switch (getResultCode()) {
                 case Activity.RESULT_OK:
                     System.out.println("SMS_SENT: RESULT_OK");
-                    this.capturarEnviado(smsId, imeiOutput, 1, "RESULT_OK");
+                    //this.capturarEnviado(smsId, imeiOutput, 1, "RESULT_OK");
                     break;
                 case Activity.RESULT_CANCELED:
                     System.out.println("SMS_SENT: RESULT_CANCELED");
-                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_CANCELED");
+                    //this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_CANCELED");
                     break;
                 case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                     System.out.println("SMS_SENT: RESULT_ERROR_GENERIC_FAILURE");
-                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_GENERIC_FAILURE");
+                    //this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_GENERIC_FAILURE");
                     break;
                 case SmsManager.RESULT_ERROR_NO_SERVICE:
                     System.out.println("SMS_SENT: RESULT_ERROR_NO_SERVICE");
-                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NO_SERVICE");
+                    //this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NO_SERVICE");
                     break;
                 case SmsManager.RESULT_ERROR_NULL_PDU:
                     System.out.println("SMS_SENT: RESULT_ERROR_NULL_PDU");
-                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NULL_PDU");
+                    //this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_NULL_PDU");
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     System.out.println("SMS_SENT: RESULT_ERROR_RADIO_OFF");
-                    this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_RADIO_OFF");
+                    //this.capturarEnviado(smsId, imeiOutput, 2, "RESULT_ERROR_RADIO_OFF");
                     break;
             }
         }
